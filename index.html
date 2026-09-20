@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리학교 급식</title>
+  <title>안화고등학교 급식</title>
+  
+  <!-- 모바일 홈 화면 앱 설정 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="안화고급식">
+  <meta name="theme-color" content="#4c6ef5">
+  
+  <!-- 웹앱 아이콘 (파비콘) -->
+  <link rel="icon" href="https://fav.farm/🍱">
+  <link rel="apple-touch-icon" href="https://fav.farm/🍱">
+
   <style>
     * {
       box-sizing: border-box;
@@ -121,9 +132,9 @@
 <body>
 
   <div class="container">
-    <h1>우리학교 급식</h1>
+    <h1>🏫 안화고등학교 급식</h1>
     
-    <!-- 날짜 이동 컨트롤러 -->
+    <!-- 날짜 이동 버튼 -->
     <div class="date-nav">
       <button onclick="changeDate(-1)">◀ 이전 날</button>
       <div class="date-display" id="current-date">날짜 불러오는 중...</div>
@@ -142,12 +153,10 @@
 
   <script>
     const ATPT_OFCDC_SC_CODE = "J10"; // 경기도교육청
-    const SD_SCHUL_CODE = "7530821"; // 학교 코드
+    const SD_SCHUL_CODE = "7530821";  // 안화고등학교
 
-    // 현재 조회 중인 날짜 (기본값: 오늘)
     let currentDate = new Date();
 
-    // YYYYMMDD 포맷 반환
     function getYMD(dateObj) {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -155,7 +164,6 @@
       return `${year}${month}${day}`;
     }
 
-    // 날짜 표시 텍스트 반환
     function getFormattedDate(dateObj) {
       const month = dateObj.getMonth() + 1;
       const day = dateObj.getDate();
@@ -164,7 +172,6 @@
       return `${month}월 ${day}일 (${dayOfWeek})`;
     }
 
-    // 급식 데이터 불러오기
     async function fetchMeal() {
       const dateStr = getYMD(currentDate);
       document.getElementById('current-date').innerText = getFormattedDate(currentDate);
@@ -199,7 +206,7 @@
             calorieContainer.innerHTML = `<div class="calorie-badge">🔥 총 열량: ${calorieData}</div>`;
           }
         } else {
-          mealContent.innerHTML = `<li class="no-meal">급식 정보가 없습니다. 😴</li>`;
+          mealContent.innerHTML = `<li class="no-meal">오늘은 급식이 없습니다. 😴</li>`;
         }
       } catch (error) {
         console.error(error);
@@ -207,19 +214,16 @@
       }
     }
 
-    // 날짜 변경 함수 (+1일 또는 -1일)
     function changeDate(days) {
       currentDate.setDate(currentDate.getDate() + days);
       fetchMeal();
     }
 
-    // 오늘 날짜로 리셋
     function resetToToday() {
       currentDate = new Date();
       fetchMeal();
     }
 
-    // 처음 로딩 시 조회
     fetchMeal();
   </script>
 </body>

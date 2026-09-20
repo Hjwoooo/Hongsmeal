@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>안화고등학교 급식</title>
+  <title>우리학교 급식</title>
   
   <!-- PWA Manifest 연결 -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="안화고급식">
+  <meta name="apple-mobile-web-app-title" content="우리학교 급식">
   <meta name="theme-color" content="#4c6ef5">
   
-  <!-- 고화질 PNG 아이콘 및 파비콘 -->
+  <!-- 아이콘 및 파비콘 -->
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
 
@@ -134,9 +134,8 @@
 <body>
 
   <div class="container">
-    <h1>🏫 안화고등학교 급식</h1>
+    <h1>🏫 우리학교 급식</h1>
     
-    <!-- 날짜 이동 버튼 -->
     <div class="date-nav">
       <button onclick="changeDate(-1)">◀ 이전 날</button>
       <div class="date-display" id="current-date">날짜 불러오는 중...</div>
@@ -228,12 +227,12 @@
 
     fetchMeal();
 
-    // 서비스 워커 등록 (독립 웹앱 설치 지원)
+    // 서비스 워커 등록 (상대 경로 ./sw.js 설정)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker Registered'))
-          .catch(err => console.log('Service Worker Failed', err));
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered', reg))
+          .catch(err => console.log('SW Failed', err));
       });
     }
   </script>

@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리학교 급식</title>
+  <title>안화고등학교 급식</title>
   
-  <!-- PWA Manifest 연결 -->
+  <!-- PWA Manifest 및 모바일 meta 설정 -->
   <link rel="manifest" href="./manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="우리학교 급식">
+  <meta name="apple-mobile-web-app-title" content="안화고급식">
   <meta name="theme-color" content="#4c6ef5">
   
-  <!-- 아이콘 및 파비콘 -->
+  <!-- 아이콘 -->
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
 
@@ -112,6 +112,7 @@
       color: #868e96;
       font-size: 1rem;
       text-align: center;
+      line-height: 1.6;
     }
     .today-btn {
       margin-top: 15px;
@@ -134,7 +135,7 @@
 <body>
 
   <div class="container">
-    <h1>🏫 우리학교 급식</h1>
+    <h1>🏫 안화고등학교 급식</h1>
     
     <div class="date-nav">
       <button onclick="changeDate(-1)">◀ 이전 날</button>
@@ -174,15 +175,23 @@
     }
 
     async function fetchMeal() {
-      const dateStr = getYMD(currentDate);
+      const dayOfWeek = currentDate.getDay(); // 0: 일요일, 6: 토요일
       document.getElementById('current-date').innerText = getFormattedDate(currentDate);
       
       const mealContent = document.getElementById('meal-content');
       const calorieContainer = document.getElementById('calorie-container');
 
-      mealContent.innerHTML = `<li class="no-meal">급식 정보를 불러오는 중입니다...</li>`;
       calorieContainer.innerHTML = '';
 
+      // 토요일(6) 또는 일요일(0) 체크
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        mealContent.innerHTML = `<li class="no-meal">주말이라 급식이 없습니다. 🎈<br>(토/일요일 휴무)</li>`;
+        return;
+      }
+
+      mealContent.innerHTML = `<li class="no-meal">급식 정보를 불러오는 중입니다...</li>`;
+
+      const dateStr = getYMD(currentDate);
       const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${dateStr}`;
 
       try {
@@ -207,7 +216,8 @@
             calorieContainer.innerHTML = `<div class="calorie-badge">🔥 총 열량: ${calorieData}</div>`;
           }
         } else {
-          mealContent.innerHTML = `<li class="no-meal">오늘은 급식이 없습니다. 😴</li>`;
+          // 평일이지만 NEIS API에 급식 정보가 없는 경우 (공휴일, 재량휴업일, 방학 등)
+          mealContent.innerHTML = `<li class="no-meal">쉬는 날이어서 급식이 없습니다.<br>(공휴일 / 휴무일) 😴</li>`;
         }
       } catch (error) {
         console.error(error);
@@ -227,12 +237,12 @@
 
     fetchMeal();
 
-    // 서비스 워커 등록 (상대 경로 ./sw.js 설정)
+    // PWA Service Worker 등록
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('SW Registered', reg))
-          .catch(err => console.log('SW Failed', err));
+          .catch(err => console.log('SW Registration Failed', err));
       });
     }
   </script>

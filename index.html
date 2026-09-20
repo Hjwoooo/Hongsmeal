@@ -159,6 +159,9 @@
 
     let currentDate = new Date();
 
+    // 페이지 진입 시 오늘이 주말이면 가장 가까운 평일로 보정
+    adjustWeekday(currentDate, 1);
+
     function getYMD(dateObj) {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -174,22 +177,21 @@
       return `${month}월 ${day}일 (${dayOfWeek})`;
     }
 
+    // 주말(토/일)이면 지정된 방향(1: 다음, -1: 이전)으로 평일까지 건너뛰기
+    function adjustWeekday(dateObj, direction = 1) {
+      while (dateObj.getDay() === 0 || dateObj.getDay() === 6) {
+        dateObj.setDate(dateObj.getDate() + direction);
+      }
+    }
+
     async function fetchMeal() {
-      const dayOfWeek = currentDate.getDay(); // 0: 일요일, 6: 토요일
       document.getElementById('current-date').innerText = getFormattedDate(currentDate);
       
       const mealContent = document.getElementById('meal-content');
       const calorieContainer = document.getElementById('calorie-container');
 
-      calorieContainer.innerHTML = '';
-
-      // 토요일(6) 또는 일요일(0) 체크
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        mealContent.innerHTML = `<li class="no-meal">주말이라 급식이 없습니다. 🎈<br>(토/일요일 휴무)</li>`;
-        return;
-      }
-
       mealContent.innerHTML = `<li class="no-meal">급식 정보를 불러오는 중입니다...</li>`;
+      calorieContainer.innerHTML = '';
 
       const dateStr = getYMD(currentDate);
       const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${dateStr}`;
@@ -227,11 +229,13 @@
 
     function changeDate(days) {
       currentDate.setDate(currentDate.getDate() + days);
+      adjustWeekday(currentDate, days); // 주말은 자동으로 건너뜀
       fetchMeal();
     }
 
     function resetToToday() {
       currentDate = new Date();
+      adjustWeekday(currentDate, 1); // 오늘이 주말이면 다가오는 월요일로 설정
       fetchMeal();
     }
 

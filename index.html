@@ -11,4 +11,231 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="안화고급식">
-  <meta
+  <meta name="theme-color" content="#4c6ef5">
+  
+  <!-- 고화질 PNG 아이콘 및 파비콘 -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f371.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .date-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background-color: #f1f3f5;
+      padding: 8px;
+      border-radius: 12px;
+    }
+    .date-nav button {
+      background-color: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #495057;
+      transition: all 0.2s;
+    }
+    .date-nav button:hover {
+      background-color: #e9ecef;
+    }
+    .date-display {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .meal-box {
+      background-color: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      padding: 20px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .meal-list {
+      list-style: none;
+      text-align: left;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      color: #212529;
+    }
+    .meal-list li {
+      border-bottom: 1px dashed #dee2e6;
+      padding: 4px 0;
+    }
+    .meal-list li:last-child {
+      border-bottom: none;
+    }
+    .calorie-badge {
+      margin-top: 15px;
+      padding: 8px 12px;
+      background-color: #e7f5ff;
+      color: #1c7ed6;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .no-meal {
+      color: #868e96;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .today-btn {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #4c6ef5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .today-btn:hover {
+      background-color: #3b5bdb;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🏫 안화고등학교 급식</h1>
+    
+    <!-- 날짜 이동 버튼 -->
+    <div class="date-nav">
+      <button onclick="changeDate(-1)">◀ 이전 날</button>
+      <div class="date-display" id="current-date">날짜 불러오는 중...</div>
+      <button onclick="changeDate(1)">다음 날 ▶</button>
+    </div>
+
+    <div class="meal-box">
+      <ul class="meal-list" id="meal-content">
+        <li class="no-meal">급식 정보를 불러오는 중입니다...</li>
+      </ul>
+      <div id="calorie-container"></div>
+    </div>
+
+    <button class="today-btn" onclick="resetToToday()">오늘 급식 보기</button>
+  </div>
+
+  <script>
+    const ATPT_OFCDC_SC_CODE = "J10"; // 경기도교육청
+    const SD_SCHUL_CODE = "7530821";  // 안화고등학교
+
+    let currentDate = new Date();
+
+    function getYMD(dateObj) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}${month}${day}`;
+    }
+
+    function getFormattedDate(dateObj) {
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayOfWeek = dayNames[dateObj.getDay()];
+      return `${month}월 ${day}일 (${dayOfWeek})`;
+    }
+
+    async function fetchMeal() {
+      const dateStr = getYMD(currentDate);
+      document.getElementById('current-date').innerText = getFormattedDate(currentDate);
+      
+      const mealContent = document.getElementById('meal-content');
+      const calorieContainer = document.getElementById('calorie-container');
+
+      mealContent.innerHTML = `<li class="no-meal">급식 정보를 불러오는 중입니다...</li>`;
+      calorieContainer.innerHTML = '';
+
+      const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${dateStr}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.mealServiceDietInfo) {
+          const mealData = data.mealServiceDietInfo[1].row[0];
+          const rawMealData = mealData.DDISH_NM;
+          const calorieData = mealData.CAL_INFO;
+
+          const cleanMeal = rawMealData
+            .replace(/\([0-9.]+\)/g, '')
+            .split('<br/>')
+            .filter(item => item.trim() !== '');
+
+          mealContent.innerHTML = cleanMeal
+            .map(food => `<li>🍱 ${food.trim()}</li>`)
+            .join('');
+
+          if (calorieData) {
+            calorieContainer.innerHTML = `<div class="calorie-badge">🔥 총 열량: ${calorieData}</div>`;
+          }
+        } else {
+          mealContent.innerHTML = `<li class="no-meal">오늘은 급식이 없습니다. 😴</li>`;
+        }
+      } catch (error) {
+        console.error(error);
+        mealContent.innerHTML = `<li class="no-meal">정보를 불러오는 데 실패했습니다.</li>`;
+      }
+    }
+
+    function changeDate(days) {
+      currentDate.setDate(currentDate.getDate() + days);
+      fetchMeal();
+    }
+
+    function resetToToday() {
+      currentDate = new Date();
+      fetchMeal();
+    }
+
+    fetchMeal();
+
+    // 서비스 워커 등록 (독립 웹앱 설치 지원)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.log('Service Worker Failed', err));
+      });
+    }
+  </script>
+</body>
+</html>

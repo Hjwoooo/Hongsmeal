@@ -1,8 +1,10 @@
 {
-  "name": "우리학교 급식",
-  "short_name": "우리학교 급식",
+  "id": "./",
+  "name": "안화고등학교 급식",
+  "short_name": "안화고급식",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#4c6ef5",
   "icons": [
